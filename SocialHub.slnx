@@ -1,0 +1,17 @@
+<Solution>
+  <Folder Name="/src/">
+    <Project Path="src/SocialHub.API/SocialHub.API.csproj" />
+    <Project Path="src/SocialHub.Application/SocialHub.Application.csproj" />
+    <Project Path="src/SocialHub.Domain/SocialHub.Domain.csproj" />
+    <Project Path="src/SocialHub.Identity/SocialHub.Identity.csproj" />
+    <Project Path="src/SocialHub.Infrastructure/SocialHub.Infrastructure.csproj" />
+    <Project Path="src/SocialHub.Persistence/SocialHub.Persistence.csproj" />
+    <Project Path="src/SocialHub.RealTime/SocialHub.RealTime.csproj" />
+  </Folder>
+  <Folder Name="/tests/">
+    <Project Path="tests/SocialHub.API.Tests/SocialHub.API.Tests.csproj" />
+    <Project Path="tests/SocialHub.Application.Tests/SocialHub.Application.Tests.csproj" />
+    <Project Path="tests/SocialHub.Domain.Tests/SocialHub.Domain.Tests.csproj" />
+    <Project Path="tests/SocialHub.Infrastructure.Tests/SocialHub.Infrastructure.Tests.csproj" />
+  </Folder>
+</Solution>
