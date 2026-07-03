@@ -15,7 +15,7 @@ namespace SocialHub.Infrastructure.Tests.Persistence;
 public sealed class PostgresDatabaseFixture : IAsyncLifetime
 {
     private const string DefaultConnectionString =
-        "Host=localhost;Port=5432;Database=socialhub_test;Username=socialhub;Password=changeme_dev";
+        "Host=localhost;Port=5432;Database=socialhub_test;Username=socialhub;Password=pswd";
  
     public ApplicationDbContext CreateContext()
     {
