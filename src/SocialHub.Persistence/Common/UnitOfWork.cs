@@ -1,18 +1,15 @@
+using Microsoft.EntityFrameworkCore.Storage;
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Persistence.Context;
  
 namespace SocialHub.Persistence.Common;
  
-/// <summary>
-/// Minimal EF-Core-backed Unit of Work. BeginTransactionAsync/RollbackAsync
-/// become real database transactions once ApplicationDbContext exists
-/// (Phase 2, step 2.2) and exposes its DatabaseFacade for explicit
-/// transaction control.
-/// </summary>
-public class UnitOfWork : IUnitOfWork
+public sealed class UnitOfWork : IUnitOfWork
 {
-    private readonly IApplicationDbContext _context;
+    private readonly ApplicationDbContext _context;
+    private IDbContextTransaction? _currentTransaction;
  
-    public UnitOfWork(IApplicationDbContext context)
+    public UnitOfWork(ApplicationDbContext context)
     {
         _context = context;
     }
@@ -20,9 +17,49 @@ public class UnitOfWork : IUnitOfWork
     public Task<int> SaveChangesAsync(CancellationToken cancellationToken = default) =>
         _context.SaveChangesAsync(cancellationToken);
  
-    public Task BeginTransactionAsync(CancellationToken cancellationToken = default) => Task.CompletedTask; // TODO(Phase 2)
+    public async Task BeginTransactionAsync(CancellationToken cancellationToken = default)
+    {
+        _currentTransaction = await _context.Database.BeginTransactionAsync(cancellationToken);
+    }
  
-    public Task CommitAsync(CancellationToken cancellationToken = default) => SaveChangesAsync(cancellationToken);
+    public async Task CommitAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            await _context.SaveChangesAsync(cancellationToken);
  
-    public Task RollbackAsync(CancellationToken cancellationToken = default) => Task.CompletedTask; // TODO(Phase 2)
+            if (_currentTransaction is not null)
+            {
+                await _currentTransaction.CommitAsync(cancellationToken);
+            }
+        }
+        finally
+        {
+            await DisposeTransactionAsync();
+        }
+    }
+ 
+    public async Task RollbackAsync(CancellationToken cancellationToken = default)
+    {
+        try
+        {
+            if (_currentTransaction is not null)
+            {
+                await _currentTransaction.RollbackAsync(cancellationToken);
+            }
+        }
+        finally
+        {
+            await DisposeTransactionAsync();
+        }
+    }
+ 
+    private async Task DisposeTransactionAsync()
+    {
+        if (_currentTransaction is not null)
+        {
+            await _currentTransaction.DisposeAsync();
+            _currentTransaction = null;
+        }
+    }
 }
