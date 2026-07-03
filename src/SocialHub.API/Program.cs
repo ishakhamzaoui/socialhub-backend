@@ -33,7 +33,7 @@ try
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 14));
 
-    builder.Services.AddSerilogRequestLogging();
+    // builder.Services.AddSerilogRequestLogging(); // 'IServiceCollection' does not contain a definition for 'AddSerilogRequestLogging'
  
     builder.Services.AddControllers();
  
