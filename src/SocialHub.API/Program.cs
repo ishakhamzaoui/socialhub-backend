@@ -1,8 +1,11 @@
+using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using Serilog;
 using SocialHub.API.Extensions;
 using SocialHub.API.Middleware;
 using SocialHub.Application;
+using SocialHub.Identity;
+using SocialHub.Identity.Models;
 using SocialHub.Persistence;
 using SocialHub.Persistence.Context;
 using SocialHub.Persistence.Seed;
@@ -49,6 +52,15 @@ try
     // its real IUnitOfWork/IRepository<,> implementations take precedence
     // over Phase 1's Null* defaults.
     builder.Services.AddPersistence(builder.Configuration);
+
+    // Phase 3: Identity & Authentication. AddIdentityInfrastructure (Identity
+    // project) registers Identity core services but stops short of
+    // .AddEntityFrameworkStores<>() to avoid a circular project reference —
+    // Persistence already references Identity for ApplicationUser/
+    // ApplicationRole, so Identity cannot reference Persistence back. The
+    // composition root chains the store wiring here instead.
+    builder.Services.AddIdentityInfrastructure(builder.Configuration)
+        .AddEntityFrameworkStores<ApplicationDbContext>();
  
     // Phase 1.9: global exception handling -> RFC 7807 ProblemDetails.
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -68,12 +80,15 @@ try
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "SocialHub API v1");
         });
 
-        // Dev-only convenience seeding (roadmap step 2.6).
-        // Production data is never seeded automatically.
+        // Dev-only convenience seeding (roadmap step 2.6, extended in Phase 3
+        // to also seed roles + a dev admin). Production data is never seeded
+        // automatically.
         using var scope = app.Services.CreateScope();
         var db = scope.ServiceProvider.GetRequiredService<ApplicationDbContext>();
         await db.Database.MigrateAsync();
-        await ApplicationDbContextSeeder.SeedAsync(db);
+        var roleManager = scope.ServiceProvider.GetRequiredService<RoleManager<ApplicationRole>>();
+        var userManager = scope.ServiceProvider.GetRequiredService<UserManager<ApplicationUser>>();
+        await ApplicationDbContextSeeder.SeedAsync(db, roleManager, userManager);
     }
  
     app.UseHttpsRedirection();

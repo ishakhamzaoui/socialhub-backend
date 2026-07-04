@@ -3,9 +3,11 @@
   <ItemGroup>
     <ProjectReference Include="..\SocialHub.Domain\SocialHub.Domain.csproj" />
     <ProjectReference Include="..\SocialHub.Application\SocialHub.Application.csproj" />
+    <ProjectReference Include="..\SocialHub.Identity\SocialHub.Identity.csproj" />
   </ItemGroup>
 
   <ItemGroup>
+    <PackageReference Include="Microsoft.AspNetCore.Identity.EntityFrameworkCore" Version="10.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore" Version="10.0.9" />
     <PackageReference Include="Microsoft.EntityFrameworkCore.Design" Version="10.0.9">
       <IncludeAssets>runtime; build; native; contentfiles; analyzers; buildtransitive</IncludeAssets>

@@ -1,12 +1,25 @@
+using Microsoft.AspNetCore.Identity;
+using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SocialHub.Application.Common.Events;
 using SocialHub.Application.Common.Interfaces;
 using SocialHub.Domain.Common;
 using SocialHub.Domain.Shared;
+using SocialHub.Identity.Models;
  
 namespace SocialHub.Persistence.Context;
  
-public class ApplicationDbContext : DbContext, IApplicationDbContext
+public class ApplicationDbContext
+    : IdentityDbContext<
+        ApplicationUser,
+        ApplicationRole,
+        Guid,
+        IdentityUserClaim<Guid>,
+        IdentityUserRole<Guid>,
+        IdentityUserLogin<Guid>,
+        IdentityRoleClaim<Guid>,
+        IdentityUserToken<Guid>>,
+      IApplicationDbContext
 {
     private readonly IDomainEventDispatcher _domainEventDispatcher;
  
@@ -18,10 +31,12 @@ public class ApplicationDbContext : DbContext, IApplicationDbContext
  
     public DbSet<Hashtag> Hashtags => Set<Hashtag>();
  
+    public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+ 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);
-        base.OnModelCreating(modelBuilder);
+        base.OnModelCreating(modelBuilder); // Identity's own entity configuration (AspNetUsers, etc.)
     }
  
     public override async Task<int> SaveChangesAsync(CancellationToken cancellationToken = default)
