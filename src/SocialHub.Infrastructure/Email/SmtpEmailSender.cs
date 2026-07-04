@@ -24,8 +24,9 @@ public sealed class SmtpEmailSender : IEmailSender
         {
             _logger.LogWarning(
                 "Smtp:Host is not configured — skipping send of '{Subject}' to {ToEmail}. " +
+                "HTML: {Html}" + 
                 "Set Smtp:Host/Port/Username/Password via User Secrets (dev) or environment variables (prod).",
-                subject, toEmail);
+                subject, toEmail, htmlBody);
             return;
         }
  
