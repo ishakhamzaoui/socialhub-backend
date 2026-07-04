@@ -5,6 +5,7 @@ using SocialHub.Application.Common.Events;
 using SocialHub.Application.Common.Interfaces;
 using SocialHub.Domain.Common;
 using SocialHub.Domain.Shared;
+using SocialHub.Domain.Users;
 using SocialHub.Identity.Models;
  
 namespace SocialHub.Persistence.Context;

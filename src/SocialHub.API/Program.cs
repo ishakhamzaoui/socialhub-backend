@@ -6,6 +6,7 @@ using SocialHub.API.Middleware;
 using SocialHub.Application;
 using SocialHub.Identity;
 using SocialHub.Identity.Models;
+using SocialHub.Infrastructure;
 using SocialHub.Persistence;
 using SocialHub.Persistence.Context;
 using SocialHub.Persistence.Seed;
@@ -35,7 +36,7 @@ try
             path: "logs/socialhub-.log",
             rollingInterval: RollingInterval.Day,
             retainedFileCountLimit: 14));
-
+ 
     // builder.Services.AddSerilogRequestLogging(); // 'IServiceCollection' does not contain a definition for 'AddSerilogRequestLogging'
  
     builder.Services.AddControllers();
@@ -47,12 +48,12 @@ try
  
     // Phase 1: Core Architecture (Result pattern, CQRS, MediatR pipeline).
     builder.Services.AddApplication();
-
+ 
     // Phase 2: Database & Persistence. Registered after AddApplication() so
     // its real IUnitOfWork/IRepository<,> implementations take precedence
     // over Phase 1's Null* defaults.
     builder.Services.AddPersistence(builder.Configuration);
-
+ 
     // Phase 3: Identity & Authentication. AddIdentityInfrastructure (Identity
     // project) registers Identity core services but stops short of
     // .AddEntityFrameworkStores<>() to avoid a circular project reference —
@@ -62,9 +63,13 @@ try
     builder.Services.AddIdentityInfrastructure(builder.Configuration)
         .AddEntityFrameworkStores<ApplicationDbContext>();
  
-    // JWT issuance (ITokenService) + the real ICurrentUserService, overriding
-    // Phase 1's NullCurrentUserService.
+    // JWT issuance (ITokenService), the real ICurrentUserService,
+    // IIdentityService, and IAppUrlProvider.
     builder.Services.AddIdentityAuthServices(builder.Configuration);
+ 
+    // Generic SMTP relay email sender (IEmailSender), used by Register/
+    // ForgotPassword to send confirmation/reset links.
+    builder.Services.AddInfrastructure(builder.Configuration);
  
     // Phase 1.9: global exception handling -> RFC 7807 ProblemDetails.
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -83,7 +88,7 @@ try
         {
             options.SwaggerEndpoint("/swagger/v1/swagger.json", "SocialHub API v1");
         });
-
+ 
         // Dev-only convenience seeding (roadmap step 2.6, extended in Phase 3
         // to also seed roles + a dev admin). Production data is never seeded
         // automatically.

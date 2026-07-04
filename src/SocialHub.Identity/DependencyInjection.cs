@@ -14,7 +14,7 @@ public static class DependencyInjection
     /// <summary>
     /// Registers ASP.NET Core Identity core services — roles, the sign-in
     /// manager, and default token providers (used for email-confirmation /
-    /// password-reset tokens, wired up in script 14).
+    /// password-reset tokens).
     ///
     /// Uses AddIdentityCore rather than AddIdentity: AddIdentity also wires a
     /// cookie authentication scheme, which this API does not want — it's
@@ -58,19 +58,23 @@ public static class DependencyInjection
     }
  
     /// <summary>
-    /// Registers JWT issuance (ITokenService) and the real, HttpContext-backed
-    /// ICurrentUserService. Must be called after AddApplication() in
-    /// Program.cs so these override Phase 1's Null* defaults (last
-    /// registration wins for constructor injection in Microsoft.DI).
+    /// Registers JWT issuance (ITokenService), the real ICurrentUserService,
+    /// IIdentityService (UserManager/SignInManager facade), and
+    /// IAppUrlProvider. Must be called after AddApplication() in Program.cs
+    /// so ICurrentUserService overrides Phase 1's NullCurrentUserService
+    /// (last registration wins for constructor injection in Microsoft.DI).
     /// </summary>
     public static IServiceCollection AddIdentityAuthServices(this IServiceCollection services, IConfiguration configuration)
     {
         services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+        services.Configure<AppUrlOptions>(configuration.GetSection("AppUrls"));
  
         services.AddHttpContextAccessor();
  
         services.AddScoped<ITokenService, TokenService>();
         services.AddScoped<ICurrentUserService, CurrentUserService>();
+        services.AddScoped<IIdentityService, IdentityService>();
+        services.AddScoped<IAppUrlProvider, AppUrlProvider>();
  
         return services;
     }

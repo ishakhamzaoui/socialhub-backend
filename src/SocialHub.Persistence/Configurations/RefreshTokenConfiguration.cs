@@ -1,6 +1,6 @@
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Metadata.Builders;
-using SocialHub.Identity.Models;
+using SocialHub.Domain.Users;
  
 namespace SocialHub.Persistence.Configurations;
  
