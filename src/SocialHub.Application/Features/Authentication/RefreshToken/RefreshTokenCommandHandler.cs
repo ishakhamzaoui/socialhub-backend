@@ -69,10 +69,11 @@ public sealed class RefreshTokenCommandHandler : ICommandHandler<RefreshTokenCom
  
         existing.Revoke(request.IpAddress, newHash);
  
-        var newRefreshToken = DomainRefreshToken.Create(existing.UserId, newHash, expiresAtUtc, request.IpAddress);
+        // Carry the device name forward across rotation — same session, new token.
+        var newRefreshToken = DomainRefreshToken.Create(existing.UserId, newHash, expiresAtUtc, request.IpAddress, existing.DeviceName);
         await _refreshTokens.AddAsync(newRefreshToken, cancellationToken);
  
-        var accessToken = _tokenService.GenerateAccessToken(userResult.Value.Id, userResult.Value.Email, userResult.Value.Roles);
+        var accessToken = _tokenService.GenerateAccessToken(userResult.Value.Id, userResult.Value.Email, userResult.Value.Roles, userResult.Value.Permissions);
  
         await _unitOfWork.SaveChangesAsync(cancellationToken);
  

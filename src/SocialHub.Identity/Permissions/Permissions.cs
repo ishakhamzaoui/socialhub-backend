@@ -8,6 +8,9 @@ namespace SocialHub.Identity.Permissions;
 /// </summary>
 public static class Permissions
 {
+    /// <summary>Claim type used for permission claims on roles and in issued JWTs.</summary>
+    public const string ClaimType = "permission";
+ 
     public static class Users
     {
         public const string View = "Permissions.Users.View";

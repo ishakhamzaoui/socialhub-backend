@@ -22,5 +22,6 @@ public class RefreshTokenConfiguration : IEntityTypeConfiguration<RefreshToken>
  
         builder.Property(x => x.CreatedByIp).HasMaxLength(64);
         builder.Property(x => x.RevokedByIp).HasMaxLength(64);
+        builder.Property(x => x.DeviceName).HasMaxLength(256);
     }
 }

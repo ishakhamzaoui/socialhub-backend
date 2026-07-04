@@ -33,11 +33,11 @@ public sealed class LoginCommandHandler : ICommandHandler<LoginCommand, AuthToke
         }
  
         var user = validation.Value;
-        var accessToken = _tokenService.GenerateAccessToken(user.Id, user.Email, user.Roles);
+        var accessToken = _tokenService.GenerateAccessToken(user.Id, user.Email, user.Roles, user.Permissions);
         var (rawRefreshToken, refreshTokenHash) = _tokenService.GenerateRefreshToken();
         var expiresAtUtc = DateTime.UtcNow.Add(_tokenService.RefreshTokenLifetime);
  
-        var refreshToken = Domain.Users.RefreshToken.Create(user.Id, refreshTokenHash, expiresAtUtc, request.IpAddress);
+        var refreshToken = Domain.Users.RefreshToken.Create(user.Id, refreshTokenHash, expiresAtUtc, request.IpAddress, request.DeviceName);
         await _refreshTokens.AddAsync(refreshToken, cancellationToken);
         await _unitOfWork.SaveChangesAsync(cancellationToken);
  

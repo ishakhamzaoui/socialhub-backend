@@ -1,7 +1,9 @@
+using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SocialHub.Domain.Shared;
 using SocialHub.Identity.Models;
+using SocialHub.Identity.Permissions;
 using SocialHub.Persistence.Context;
  
 namespace SocialHub.Persistence.Seed;
@@ -12,20 +14,33 @@ public static class ApplicationDbContextSeeder
     {
         "welcome", "introduction", "general", "announcements", "help"
     };
-
+ 
     private static readonly (string Name, string? Description)[] DefaultRoles =
     {
         ("Admin", "Full administrative access"),
         ("Moderator", "Content moderation access"),
         ("User", "Standard authenticated user")
     };
-
+ 
+    // Starter role -> permission mapping. Later phases extend Permissions.All
+    // and should extend this map alongside it.
+    private static readonly Dictionary<string, string[]> RolePermissions = new()
+    {
+        ["Admin"] = Permissions.All.ToArray(),
+        ["Moderator"] = new[]
+        {
+            Permissions.Users.View,
+            Permissions.Roles.View,
+            Permissions.System.ViewAuditLog
+        },
+        ["User"] = Array.Empty<string>()
+    };
+ 
     // DEV-ONLY credential, same pattern as the Postgres dev password from
     // Phase 0 — never used in production. Phase 3's real registration flow
-    // (script 14) is how production admins actually get created.
-    private const string DevAdminEmail = "admin@shub.lan";
+    // is how production admins actually get created.
+    private const string DevAdminEmail = "admin@socialhub.local";
     private const string DevAdminPassword = "Dev@Admin123!";
-
  
     public static async Task SeedAsync(
         ApplicationDbContext context,
@@ -54,12 +69,30 @@ public static class ApplicationDbContextSeeder
     {
         foreach (var (name, description) in DefaultRoles)
         {
-            if (await roleManager.RoleExistsAsync(name))
+            var role = await roleManager.FindByNameAsync(name);
+            if (role is null)
+            {
+                role = new ApplicationRole(name, description);
+                await roleManager.CreateAsync(role);
+            }
+ 
+            if (!RolePermissions.TryGetValue(name, out var permissions) || permissions.Length == 0)
             {
                 continue;
             }
  
-            await roleManager.CreateAsync(new ApplicationRole(name, description));
+            var existingPermissionValues = (await roleManager.GetClaimsAsync(role))
+                .Where(c => c.Type == Permissions.ClaimType)
+                .Select(c => c.Value)
+                .ToHashSet();
+ 
+            foreach (var permission in permissions)
+            {
+                if (!existingPermissionValues.Contains(permission))
+                {
+                    await roleManager.AddClaimAsync(role, new Claim(Permissions.ClaimType, permission));
+                }
+            }
         }
     }
  

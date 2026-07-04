@@ -67,9 +67,11 @@ try
     // IIdentityService, and IAppUrlProvider.
     builder.Services.AddIdentityAuthServices(builder.Configuration);
  
-    // Generic SMTP relay email sender (IEmailSender), used by Register/
-    // ForgotPassword to send confirmation/reset links.
+    // Generic SMTP relay email sender + Redis connection multiplexer.
     builder.Services.AddInfrastructure(builder.Configuration);
+ 
+    // Roadmap 3.13: Redis-backed rate limiting on auth endpoints.
+    builder.Services.AddSocialHubRateLimiting(builder.Configuration);
  
     // Phase 1.9: global exception handling -> RFC 7807 ProblemDetails.
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
@@ -101,6 +103,8 @@ try
     }
  
     app.UseHttpsRedirection();
+ 
+    app.UseRateLimiter();
  
     app.UseAuthentication();
     app.UseAuthorization();

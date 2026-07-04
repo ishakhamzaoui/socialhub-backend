@@ -3,10 +3,13 @@ using SocialHub.Domain.Common;
 namespace SocialHub.Domain.Users;
  
 /// <summary>
-/// Opaque, single-use refresh token. The raw token value is never persisted —
-/// only its SHA-256 hash (SocialHub.Identity.Token.TokenService does the
-/// hashing) — so a leaked database backup does not hand out usable refresh
-/// tokens.
+/// Opaque, single-use refresh token — also SocialHub's "session" concept
+/// (roadmap 3.12): DeviceName captures the User-Agent at login so a user can
+/// see and individually revoke active sessions (AuthController's
+/// GET/POST /api/v1/auth/sessions endpoints).
+///
+/// The raw token value is never persisted — only its SHA-256 hash
+/// (SocialHub.Identity.Token.TokenService does the hashing).
 ///
 /// Rotation model: redeeming a token revokes it and stamps
 /// ReplacedByTokenHash in the same operation. If an already-revoked token is
@@ -16,13 +19,7 @@ namespace SocialHub.Domain.Users;
 /// Lives in Domain (not Identity): the Application-layer auth command
 /// handlers need to read/write this entity via the existing generic
 /// IRepository&lt;TEntity,TId&gt;, and Application cannot reference
-/// SocialHub.Identity (would be circular). Unlike ApplicationUser/
-/// ApplicationRole, RefreshToken has no dependency on ASP.NET Core Identity
-/// base classes, so it belongs here per spec §6.
-///
-/// Mirrors SocialHub.Domain.Shared.Hashtag's exact construction pattern
-/// (private ctor + static Create factory over BaseEntity's protected
-/// Guid-id constructor).
+/// SocialHub.Identity (would be circular).
 /// </summary>
 public sealed class RefreshToken : BaseEntity, IAggregateRoot
 {
@@ -31,7 +28,7 @@ public sealed class RefreshToken : BaseEntity, IAggregateRoot
         // Reserved for EF Core materialization.
     }
  
-    private RefreshToken(Guid id, Guid userId, string tokenHash, DateTime expiresAtUtc, string? createdByIp)
+    private RefreshToken(Guid id, Guid userId, string tokenHash, DateTime expiresAtUtc, string? createdByIp, string? deviceName)
         : base(id)
     {
         UserId = userId;
@@ -39,6 +36,7 @@ public sealed class RefreshToken : BaseEntity, IAggregateRoot
         ExpiresAtUtc = expiresAtUtc;
         CreatedAtUtc = DateTime.UtcNow;
         CreatedByIp = createdByIp;
+        DeviceName = deviceName;
     }
  
     public Guid UserId { get; private set; }
@@ -50,6 +48,8 @@ public sealed class RefreshToken : BaseEntity, IAggregateRoot
     public DateTime CreatedAtUtc { get; private set; }
  
     public string? CreatedByIp { get; private set; }
+ 
+    public string? DeviceName { get; private set; }
  
     public DateTime? RevokedAtUtc { get; private set; }
  
@@ -63,14 +63,14 @@ public sealed class RefreshToken : BaseEntity, IAggregateRoot
  
     public bool IsActive => !IsRevoked && !IsExpired;
  
-    public static RefreshToken Create(Guid userId, string tokenHash, DateTime expiresAtUtc, string? createdByIp)
+    public static RefreshToken Create(Guid userId, string tokenHash, DateTime expiresAtUtc, string? createdByIp, string? deviceName = null)
     {
         if (string.IsNullOrWhiteSpace(tokenHash))
         {
             throw new ArgumentException("Token hash cannot be empty.", nameof(tokenHash));
         }
  
-        return new RefreshToken(Guid.NewGuid(), userId, tokenHash, expiresAtUtc, createdByIp);
+        return new RefreshToken(Guid.NewGuid(), userId, tokenHash, expiresAtUtc, createdByIp, deviceName);
     }
  
     public void Revoke(string? revokedByIp, string? replacedByTokenHash = null)

@@ -6,6 +6,7 @@ using Microsoft.Extensions.Options;
 using Microsoft.IdentityModel.Tokens;
 using SocialHub.Application.Common.Interfaces;
 using SocialHub.Identity.Options;
+using SocialHub.Identity.Permissions;
  
 namespace SocialHub.Identity.Token;
  
@@ -42,7 +43,7 @@ public sealed class TokenService : ITokenService
  
         if (permissions is not null)
         {
-            claims.AddRange(permissions.Select(permission => new Claim("permission", permission)));
+            claims.AddRange(permissions.Select(permission => new Claim(Permissions.Permissions.ClaimType, permission)));
         }
  
         var signingKey = new SymmetricSecurityKey(Encoding.UTF8.GetBytes(_options.Key));

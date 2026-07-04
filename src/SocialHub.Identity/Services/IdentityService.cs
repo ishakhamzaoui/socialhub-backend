@@ -3,6 +3,7 @@ using SocialHub.Application.Common.Interfaces;
 using SocialHub.Application.Common.Models;
 using SocialHub.Application.Common.Results;
 using SocialHub.Identity.Models;
+using SocialHub.Identity.Permissions;
  
 namespace SocialHub.Identity.Services;
  
@@ -10,11 +11,16 @@ public sealed class IdentityService : IIdentityService
 {
     private readonly UserManager<ApplicationUser> _userManager;
     private readonly SignInManager<ApplicationUser> _signInManager;
+    private readonly RoleManager<ApplicationRole> _roleManager;
  
-    public IdentityService(UserManager<ApplicationUser> userManager, SignInManager<ApplicationUser> signInManager)
+    public IdentityService(
+        UserManager<ApplicationUser> userManager,
+        SignInManager<ApplicationUser> signInManager,
+        RoleManager<ApplicationRole> roleManager)
     {
         _userManager = userManager;
         _signInManager = signInManager;
+        _roleManager = roleManager;
     }
  
     public async Task<Result<Guid>> CreateUserAsync(string email, string password, CancellationToken cancellationToken = default)
@@ -103,8 +109,9 @@ public sealed class IdentityService : IIdentityService
         await _userManager.UpdateAsync(user);
  
         var roles = await _userManager.GetRolesAsync(user);
+        var permissions = await GetPermissionsAsync(roles);
  
-        return Result.Success(new UserAuthInfo(user.Id, user.Email!, roles.ToList()));
+        return Result.Success(new UserAuthInfo(user.Id, user.Email!, roles.ToList(), permissions));
     }
  
     public async Task<Result<UserAuthInfo>> GetUserByIdAsync(Guid userId, CancellationToken cancellationToken = default)
@@ -116,7 +123,9 @@ public sealed class IdentityService : IIdentityService
         }
  
         var roles = await _userManager.GetRolesAsync(user);
-        return Result.Success(new UserAuthInfo(user.Id, user.Email!, roles.ToList()));
+        var permissions = await GetPermissionsAsync(roles);
+ 
+        return Result.Success(new UserAuthInfo(user.Id, user.Email!, roles.ToList(), permissions));
     }
  
     public async Task<Result<string?>> GeneratePasswordResetTokenAsync(string email, CancellationToken cancellationToken = default)
@@ -147,5 +156,27 @@ public sealed class IdentityService : IIdentityService
         }
  
         return Result.Success();
+    }
+ 
+    private async Task<IReadOnlyList<string>> GetPermissionsAsync(IEnumerable<string> roleNames)
+    {
+        var permissions = new HashSet<string>();
+ 
+        foreach (var roleName in roleNames)
+        {
+            var role = await _roleManager.FindByNameAsync(roleName);
+            if (role is null)
+            {
+                continue;
+            }
+ 
+            var claims = await _roleManager.GetClaimsAsync(role);
+            foreach (var claim in claims.Where(c => c.Type == Permissions.Permissions.ClaimType))
+            {
+                permissions.Add(claim.Value);
+            }
+        }
+ 
+        return permissions.ToList();
     }
 }
