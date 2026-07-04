@@ -62,6 +62,10 @@ try
     builder.Services.AddIdentityInfrastructure(builder.Configuration)
         .AddEntityFrameworkStores<ApplicationDbContext>();
  
+    // JWT issuance (ITokenService) + the real ICurrentUserService, overriding
+    // Phase 1's NullCurrentUserService.
+    builder.Services.AddIdentityAuthServices(builder.Configuration);
+ 
     // Phase 1.9: global exception handling -> RFC 7807 ProblemDetails.
     builder.Services.AddExceptionHandler<GlobalExceptionHandler>();
     builder.Services.AddProblemDetails();

@@ -1,7 +1,11 @@
 using Microsoft.AspNetCore.Identity;
 using Microsoft.Extensions.Configuration;
 using Microsoft.Extensions.DependencyInjection;
+using SocialHub.Application.Common.Interfaces;
 using SocialHub.Identity.Models;
+using SocialHub.Identity.Options;
+using SocialHub.Identity.Services;
+using SocialHub.Identity.Token;
  
 namespace SocialHub.Identity;
  
@@ -44,12 +48,30 @@ public static class DependencyInjection
                 options.User.RequireUniqueEmail = true;
  
                 // Login is blocked until email is confirmed (spec 15.1 /
-                // roadmap 3.8). The dev-seeded admin below has its email
+                // roadmap 3.8). The dev-seeded admin has its email
                 // pre-confirmed so local development isn't blocked on SMTP.
                 options.SignIn.RequireConfirmedEmail = true;
             })
             .AddRoles<ApplicationRole>()
             .AddSignInManager()
             .AddDefaultTokenProviders();
+    }
+ 
+    /// <summary>
+    /// Registers JWT issuance (ITokenService) and the real, HttpContext-backed
+    /// ICurrentUserService. Must be called after AddApplication() in
+    /// Program.cs so these override Phase 1's Null* defaults (last
+    /// registration wins for constructor injection in Microsoft.DI).
+    /// </summary>
+    public static IServiceCollection AddIdentityAuthServices(this IServiceCollection services, IConfiguration configuration)
+    {
+        services.Configure<JwtOptions>(configuration.GetSection("Jwt"));
+ 
+        services.AddHttpContextAccessor();
+ 
+        services.AddScoped<ITokenService, TokenService>();
+        services.AddScoped<ICurrentUserService, CurrentUserService>();
+ 
+        return services;
     }
 }
