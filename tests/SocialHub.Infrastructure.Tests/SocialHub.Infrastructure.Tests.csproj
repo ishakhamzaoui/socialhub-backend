@@ -24,6 +24,7 @@
   <ItemGroup>
     <ProjectReference Include="..\..\src\SocialHub.Infrastructure\SocialHub.Infrastructure.csproj" />
     <ProjectReference Include="..\..\src\SocialHub.Persistence\SocialHub.Persistence.csproj" />
+    <ProjectReference Include="..\..\src\SocialHub.Identity\SocialHub.Identity.csproj" />
   </ItemGroup>
 
 </Project>
