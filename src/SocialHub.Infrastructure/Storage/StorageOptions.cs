@@ -6,6 +6,12 @@ namespace SocialHub.Infrastructure.Storage;
 /// genuinely needs a different mount point, never to work around a missing
 /// directory (create the directory instead; LocalFileStorageService also
 /// creates it defensively on startup).
+///
+/// Image/video resize and thumbnail dimensions are NOT configured here —
+/// they're supplied as explicit call parameters by whichever Application
+/// handler invokes IImageProcessingService/IVideoProcessingService (see
+/// UploadMediaCommandHandler), since Application cannot reference this
+/// (Infrastructure) project to read them from here.
 /// </summary>
 public sealed class StorageOptions
 {
@@ -13,10 +19,4 @@ public sealed class StorageOptions
  
     /// <summary>How long a file may sit under temp/ before MediaCleanupService deletes it (roadmap 4.7).</summary>
     public int TempFileTtlHours { get; set; } = 24;
- 
-    /// <summary>Longest-side cap, in pixels, applied when resizing/compressing an uploaded image.</summary>
-    public int ImageMaxDimension { get; set; } = 2048;
- 
-    /// <summary>Longest-side cap, in pixels, for generated thumbnails (images and video frames alike).</summary>
-    public int ThumbnailSize { get; set; } = 320;
 }
