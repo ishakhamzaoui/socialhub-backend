@@ -4,6 +4,7 @@ using Microsoft.EntityFrameworkCore;
 using SocialHub.Application.Common.Events;
 using SocialHub.Application.Common.Interfaces;
 using SocialHub.Domain.Common;
+using SocialHub.Domain.Media;
 using SocialHub.Domain.Shared;
 using SocialHub.Domain.Users;
 using SocialHub.Identity.Models;
@@ -33,6 +34,8 @@ public class ApplicationDbContext
     public DbSet<Hashtag> Hashtags => Set<Hashtag>();
  
     public DbSet<RefreshToken> RefreshTokens => Set<RefreshToken>();
+ 
+    public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
  
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {

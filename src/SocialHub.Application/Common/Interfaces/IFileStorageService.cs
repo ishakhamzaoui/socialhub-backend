@@ -1,3 +1,5 @@
+using SocialHub.Domain.Media;
+ 
 namespace SocialHub.Application.Common.Interfaces;
  
 /// <summary>
@@ -12,9 +14,9 @@ namespace SocialHub.Application.Common.Interfaces;
 /// anything left under temp/ past a short TTL is by definition an
 /// interrupted or abandoned upload and is safe to delete.
 ///
-/// All paths accepted/returned by this interface other than the Get*AbsolutePath
-/// methods are relative to the configured storage root — never absolute —
-/// so relative paths are safe to persist in MediaAsset.StoragePath.
+/// All paths accepted/returned by this interface other than GetAbsolutePath
+/// are relative to the configured storage root — never absolute — so
+/// relative paths are safe to persist in MediaAsset.StoragePath.
 /// </summary>
 public interface IFileStorageService
 {
@@ -26,7 +28,7 @@ public interface IFileStorageService
         string tempRelativePath,
         string? tempThumbnailRelativePath,
         Guid ownerId,
-        string category,
+        MediaCategory category,
         string fileName,
         CancellationToken cancellationToken = default);
  

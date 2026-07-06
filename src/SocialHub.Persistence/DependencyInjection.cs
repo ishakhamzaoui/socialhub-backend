@@ -27,8 +27,9 @@ public static class DependencyInjection
         services.AddScoped(typeof(IRepository<,>), typeof(RepositoryBase<,>));
         services.AddScoped<IUnitOfWork, UnitOfWork>();
  
-        // Feature-specific repository.
+        // Feature-specific repositories.
         services.AddScoped<IHashtagRepository, HashtagRepository>();
+        services.AddScoped<IMediaAssetRepository, MediaAssetRepository>();
  
         return services;
     }
