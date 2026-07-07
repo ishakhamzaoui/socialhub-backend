@@ -37,6 +37,14 @@ public class ApplicationDbContext
  
     public DbSet<MediaAsset> MediaAssets => Set<MediaAsset>();
  
+    public DbSet<UserProfile> UserProfiles => Set<UserProfile>();
+ 
+    public DbSet<Follow> Follows => Set<Follow>();
+ 
+    public DbSet<UserBlock> UserBlocks => Set<UserBlock>();
+ 
+    public DbSet<UserMute> UserMutes => Set<UserMute>();
+ 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);

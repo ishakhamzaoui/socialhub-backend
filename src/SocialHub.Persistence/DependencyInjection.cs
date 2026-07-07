@@ -31,6 +31,12 @@ public static class DependencyInjection
         services.AddScoped<IHashtagRepository, HashtagRepository>();
         services.AddScoped<IMediaAssetRepository, MediaAssetRepository>();
  
+        // Phase 5 — User Management.
+        services.AddScoped<IUserProfileRepository, UserProfileRepository>();
+        services.AddScoped<IFollowRepository, FollowRepository>();
+        services.AddScoped<IUserBlockRepository, UserBlockRepository>();
+        services.AddScoped<IUserMuteRepository, UserMuteRepository>();
+ 
         return services;
     }
 }
