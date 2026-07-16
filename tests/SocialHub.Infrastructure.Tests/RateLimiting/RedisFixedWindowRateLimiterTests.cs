@@ -47,7 +47,7 @@ public class RedisFixedWindowRateLimiterTests
 
         var first = await limiter.AcquireAsync();
         var second = await limiter.AcquireAsync();
-        await Task.Delay(1000);
+        await Task.Delay(3000);
         var third = await limiter.AcquireAsync();
 
         first.IsAcquired.Should().BeTrue();

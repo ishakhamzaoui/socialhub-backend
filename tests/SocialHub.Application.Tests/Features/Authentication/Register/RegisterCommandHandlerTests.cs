@@ -12,8 +12,11 @@ public class RegisterCommandHandlerTests
     private readonly IIdentityService _identityService = Substitute.For<IIdentityService>();
     private readonly IEmailSender _emailSender = Substitute.For<IEmailSender>();
     private readonly IAppUrlProvider _appUrlProvider = Substitute.For<IAppUrlProvider>();
+    private readonly IUserProfileRepository _userProfileRepository = Substitute.For<IUserProfileRepository>();
+    private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
  
-    private RegisterCommandHandler CreateHandler() => new(_identityService, _emailSender, _appUrlProvider);
+    private RegisterCommandHandler CreateHandler() => 
+        new(_identityService, _emailSender, _appUrlProvider, _userProfileRepository, _unitOfWork);
  
     [Fact]
     public async Task Handle_Should_SendConfirmationEmail_When_UserCreatedSuccessfully()

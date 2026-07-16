@@ -2,6 +2,7 @@ using System.Security.Claims;
 using Microsoft.AspNetCore.Identity;
 using Microsoft.EntityFrameworkCore;
 using SocialHub.Domain.Shared;
+using SocialHub.Domain.Users;
 using SocialHub.Identity.Models;
 using SocialHub.Identity.Permissions;
 using SocialHub.Persistence.Context;
@@ -50,7 +51,7 @@ public static class ApplicationDbContextSeeder
     {
         await SeedHashtagsAsync(context, cancellationToken);
         await SeedRolesAsync(roleManager);
-        await SeedDevAdminAsync(userManager);
+        await SeedDevAdminAsync(context, userManager, cancellationToken);
     }
  
     private static async Task SeedHashtagsAsync(ApplicationDbContext context, CancellationToken cancellationToken)
@@ -96,26 +97,43 @@ public static class ApplicationDbContextSeeder
         }
     }
  
-    private static async Task SeedDevAdminAsync(UserManager<ApplicationUser> userManager)
+    private static async Task SeedDevAdminAsync(
+        ApplicationDbContext context,
+        UserManager<ApplicationUser> userManager,
+        CancellationToken cancellationToken)
     {
-        if (await userManager.FindByEmailAsync(DevAdminEmail) is not null)
+        var admin = await userManager.FindByEmailAsync(DevAdminEmail);
+        if (admin is null)
         {
-            return;
+            admin = new ApplicationUser
+            {
+                UserName = DevAdminEmail,
+                Email = DevAdminEmail,
+                EmailConfirmed = true, // pre-confirmed: RequireConfirmedEmail=true would otherwise block dev login
+                IsActive = true,
+                CreatedAtUtc = DateTime.UtcNow
+            };
+ 
+            var result = await userManager.CreateAsync(admin, DevAdminPassword);
+            if (!result.Succeeded)
+            {
+                return;
+            }
+ 
+            await userManager.AddToRoleAsync(admin, "Admin");
         }
  
-        var admin = new ApplicationUser
+        // Phase 5 addition: this account was created via UserManager before
+        // UserProfile existed, so — unlike every account registered through
+        // RegisterCommandHandler from Phase 5 onward — it has no profile row
+        // of its own. Backfilled here, idempotently, so re-running the
+        // seeder against an already-seeded dev database still converges.
+        var hasProfile = await context.UserProfiles.AnyAsync(p => p.UserId == admin.Id, cancellationToken);
+        if (!hasProfile)
         {
-            UserName = DevAdminEmail,
-            Email = DevAdminEmail,
-            EmailConfirmed = true, // pre-confirmed: RequireConfirmedEmail=true would otherwise block dev login
-            IsActive = true,
-            CreatedAtUtc = DateTime.UtcNow
-        };
- 
-        var result = await userManager.CreateAsync(admin, DevAdminPassword);
-        if (result.Succeeded)
-        {
-            await userManager.AddToRoleAsync(admin, "Admin");
+            var profile = UserProfile.CreateDefault(admin.Id, "Admin");
+            context.UserProfiles.Add(profile);
+            await context.SaveChangesAsync(cancellationToken);
         }
     }
 }
