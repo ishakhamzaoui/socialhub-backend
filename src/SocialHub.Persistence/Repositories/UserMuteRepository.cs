@@ -20,4 +20,7 @@ public sealed class UserMuteRepository : RepositoryBase<UserMute, Guid>, IUserMu
  
     public async Task<bool> IsMutedAsync(Guid muterId, Guid mutedId, CancellationToken cancellationToken = default) =>
         await _context.Set<UserMute>().AnyAsync(m => m.MuterId == muterId && m.MutedId == mutedId, cancellationToken);
+ 
+    public async Task<IReadOnlyList<Guid>> GetMutedUserIdsAsync(Guid muterId, CancellationToken cancellationToken = default) =>
+        await _context.Set<UserMute>().Where(m => m.MuterId == muterId).Select(m => m.MutedId).ToListAsync(cancellationToken);
 }
