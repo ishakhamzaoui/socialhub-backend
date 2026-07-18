@@ -37,7 +37,12 @@ public static class DependencyInjection
         services.AddSingleton<IImageProcessingService, SkiaImageProcessingService>();
         services.AddSingleton<IVideoProcessingService, FfmpegVideoProcessingService>();
         services.AddHostedService<MediaCleanupService>();
- 
+
+        // Phase 6 — Posts (roadmap 6.7). Needs Scoped dependencies
+        // (IPostRepository/IUnitOfWork), unlike every other service
+        // registered above — see ScheduledPostPublishingService's remarks.
+        services.AddHostedService<ScheduledPostPublishingService>();
+        
         return services;
     }
 }

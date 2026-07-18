@@ -36,7 +36,11 @@ public static class DependencyInjection
         services.AddScoped<IFollowRepository, FollowRepository>();
         services.AddScoped<IUserBlockRepository, UserBlockRepository>();
         services.AddScoped<IUserMuteRepository, UserMuteRepository>();
- 
+
+        // Phase 6 — Posts.
+        services.AddScoped<IPostRepository, PostRepository>();
+        services.AddScoped<IPostRepostRepository, PostRepostRepository>();
+        
         return services;
     }
 }

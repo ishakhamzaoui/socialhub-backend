@@ -5,6 +5,7 @@ using SocialHub.Application.Common.Events;
 using SocialHub.Application.Common.Interfaces;
 using SocialHub.Domain.Common;
 using SocialHub.Domain.Media;
+using SocialHub.Domain.Posts;
 using SocialHub.Domain.Shared;
 using SocialHub.Domain.Users;
 using SocialHub.Identity.Models;
@@ -44,6 +45,18 @@ public class ApplicationDbContext
     public DbSet<UserBlock> UserBlocks => Set<UserBlock>();
  
     public DbSet<UserMute> UserMutes => Set<UserMute>();
+
+    // Phase 6 — Posts.
+    public DbSet<Post> Posts => Set<Post>();
+
+    public DbSet<PostMedia> PostMedia => Set<PostMedia>();
+
+    public DbSet<PostHashtag> PostHashtags => Set<PostHashtag>();
+
+    public DbSet<PostMention> PostMentions => Set<PostMention>();
+
+    public DbSet<PostRepost> PostReposts => Set<PostRepost>();
+
  
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
