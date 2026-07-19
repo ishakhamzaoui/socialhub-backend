@@ -3,6 +3,7 @@ using MediatR;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using SocialHub.API.Extensions;
+using SocialHub.Application.Features.Comments;
 using SocialHub.Application.Features.Posts;
 using SocialHub.Domain.Posts;
  
@@ -59,6 +60,19 @@ public sealed class PostsController : ControllerBase
     public async Task<IActionResult> Get(Guid postId, CancellationToken cancellationToken)
     {
         var result = await _sender.Send(new GetPostQuery(postId), cancellationToken);
+        return result.ToActionResult(this);
+    }
+ 
+    /// <summary>
+    /// Phase 7 addition. Top-level comments only (ParentCommentId null) —
+    /// use CommentsController's GetReplies for a given comment's replies.
+    /// Access/visibility is resolved by GetPostCommentsQuery reusing
+    /// PostAccessPolicy exactly the way Get(postId) above does.
+    /// </summary>
+    [HttpGet("{postId:guid}/comments")]
+    public async Task<IActionResult> GetComments(Guid postId, [FromQuery] int page = 1, [FromQuery] int pageSize = 20, CancellationToken cancellationToken = default)
+    {
+        var result = await _sender.Send(new GetPostCommentsQuery(postId, page, pageSize), cancellationToken);
         return result.ToActionResult(this);
     }
  

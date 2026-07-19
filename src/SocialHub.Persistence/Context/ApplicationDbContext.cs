@@ -3,6 +3,7 @@ using Microsoft.AspNetCore.Identity.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore;
 using SocialHub.Application.Common.Events;
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Domain.Comments;
 using SocialHub.Domain.Common;
 using SocialHub.Domain.Media;
 using SocialHub.Domain.Posts;
@@ -45,18 +46,26 @@ public class ApplicationDbContext
     public DbSet<UserBlock> UserBlocks => Set<UserBlock>();
  
     public DbSet<UserMute> UserMutes => Set<UserMute>();
-
+ 
     // Phase 6 — Posts.
     public DbSet<Post> Posts => Set<Post>();
-
+ 
     public DbSet<PostMedia> PostMedia => Set<PostMedia>();
-
+ 
     public DbSet<PostHashtag> PostHashtags => Set<PostHashtag>();
-
+ 
     public DbSet<PostMention> PostMentions => Set<PostMention>();
-
+ 
     public DbSet<PostRepost> PostReposts => Set<PostRepost>();
-
+ 
+    // Phase 7 — Comments & Reactions.
+    public DbSet<Comment> Comments => Set<Comment>();
+ 
+    public DbSet<CommentMention> CommentMentions => Set<CommentMention>();
+ 
+    public DbSet<CommentReaction> CommentReactions => Set<CommentReaction>();
+ 
+    public DbSet<CommentReport> CommentReports => Set<CommentReport>();
  
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
