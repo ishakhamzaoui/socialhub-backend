@@ -6,6 +6,7 @@ using SocialHub.API.Extensions;
 using SocialHub.Application.Features.Comments;
 using SocialHub.Application.Features.Posts;
 using SocialHub.Domain.Posts;
+using SocialHub.Domain.Shared;
  
 namespace SocialHub.API.Controllers;
  
@@ -145,6 +146,25 @@ public sealed class PostsController : ControllerBase
         var result = await _sender.Send(new UndoRepostCommand(postId), cancellationToken);
         return result.ToActionResult(this);
     }
+ 
+    /// <summary>
+    /// Added in script 53 (Phase 8) — Posts previously had no like/reaction
+    /// capability at all (see PostReaction's remarks). Mirrors
+    /// CommentsController's React/RemoveReaction actions exactly.
+    /// </summary>
+    [HttpPost("{postId:guid}/reactions")]
+    public async Task<IActionResult> React(Guid postId, [FromBody] ReactToPostRequest request, CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(new ReactToPostCommand(postId, request.Type), cancellationToken);
+        return result.ToActionResult(this);
+    }
+ 
+    [HttpDelete("{postId:guid}/reactions")]
+    public async Task<IActionResult> RemoveReaction(Guid postId, CancellationToken cancellationToken)
+    {
+        var result = await _sender.Send(new RemovePostReactionCommand(postId), cancellationToken);
+        return result.ToActionResult(this);
+    }
 }
  
 public sealed class CreatePostRequest
@@ -169,4 +189,9 @@ public sealed class UpdatePostRequest
 public sealed class SchedulePostRequest
 {
     public DateTime ScheduledForUtc { get; set; }
+}
+ 
+public sealed class ReactToPostRequest
+{
+    public ReactionType Type { get; set; }
 }

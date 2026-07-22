@@ -447,6 +447,39 @@ namespace SocialHub.Persistence.Migrations
                     b.ToTable("post_mentions", (string)null);
                 });
 
+            modelBuilder.Entity("SocialHub.Domain.Posts.PostReaction", b =>
+                {
+                    b.Property<Guid>("Id")
+                        .ValueGeneratedOnAdd()
+                        .HasColumnType("uuid");
+
+                    b.Property<DateTime>("CreatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("PostId")
+                        .HasColumnType("uuid");
+
+                    b.Property<string>("Type")
+                        .IsRequired()
+                        .HasMaxLength(20)
+                        .HasColumnType("character varying(20)");
+
+                    b.Property<DateTime?>("UpdatedAtUtc")
+                        .HasColumnType("timestamp with time zone");
+
+                    b.Property<Guid>("UserId")
+                        .HasColumnType("uuid");
+
+                    b.HasKey("Id");
+
+                    b.HasIndex("PostId", "Type");
+
+                    b.HasIndex("PostId", "UserId")
+                        .IsUnique();
+
+                    b.ToTable("post_reactions", (string)null);
+                });
+
             modelBuilder.Entity("SocialHub.Domain.Posts.PostRepost", b =>
                 {
                     b.Property<Guid>("Id")

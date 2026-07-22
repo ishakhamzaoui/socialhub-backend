@@ -13,6 +13,9 @@ public sealed class GetPostQueryHandler : IQueryHandler<GetPostQuery, PostDto>
     private readonly IHashtagRepository _hashtagRepository;
     private readonly IFollowRepository _followRepository;
     private readonly IUserBlockRepository _userBlockRepository;
+    private readonly ICommentRepository _commentRepository;
+    private readonly IPostReactionRepository _postReactionRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
  
     public GetPostQueryHandler(
         ICurrentUserService currentUserService,
@@ -20,7 +23,10 @@ public sealed class GetPostQueryHandler : IQueryHandler<GetPostQuery, PostDto>
         IMediaAssetRepository mediaAssetRepository,
         IHashtagRepository hashtagRepository,
         IFollowRepository followRepository,
-        IUserBlockRepository userBlockRepository)
+        IUserBlockRepository userBlockRepository,
+        ICommentRepository commentRepository,
+        IPostReactionRepository postReactionRepository,
+        IUserProfileRepository userProfileRepository)
     {
         _currentUserService = currentUserService;
         _postRepository = postRepository;
@@ -28,6 +34,9 @@ public sealed class GetPostQueryHandler : IQueryHandler<GetPostQuery, PostDto>
         _hashtagRepository = hashtagRepository;
         _followRepository = followRepository;
         _userBlockRepository = userBlockRepository;
+        _commentRepository = commentRepository;
+        _postReactionRepository = postReactionRepository;
+        _userProfileRepository = userProfileRepository;
     }
  
     public async Task<Result<PostDto>> Handle(GetPostQuery request, CancellationToken cancellationToken)
@@ -53,7 +62,10 @@ public sealed class GetPostQueryHandler : IQueryHandler<GetPostQuery, PostDto>
                 return Result.Failure<PostDto>(Error.Forbidden("Post.Private", "This post is not visible to you."));
         }
  
-        var dto = await PostDtoFactory.CreateAsync(post, _mediaAssetRepository, _hashtagRepository, cancellationToken);
+        var dto = await PostDtoFactory.CreateAsync(
+            post, requesterId, _mediaAssetRepository, _hashtagRepository, _commentRepository,
+            _postReactionRepository, _postRepository, _followRepository, _userBlockRepository,
+            _userProfileRepository, cancellationToken);
         return Result.Success(dto);
     }
 }

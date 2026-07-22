@@ -11,6 +11,11 @@ public sealed class PublishPostCommandHandler : ICommandHandler<PublishPostComma
     private readonly IPostRepository _postRepository;
     private readonly IMediaAssetRepository _mediaAssetRepository;
     private readonly IHashtagRepository _hashtagRepository;
+    private readonly ICommentRepository _commentRepository;
+    private readonly IPostReactionRepository _postReactionRepository;
+    private readonly IFollowRepository _followRepository;
+    private readonly IUserBlockRepository _userBlockRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
     private readonly IUnitOfWork _unitOfWork;
  
     public PublishPostCommandHandler(
@@ -18,12 +23,22 @@ public sealed class PublishPostCommandHandler : ICommandHandler<PublishPostComma
         IPostRepository postRepository,
         IMediaAssetRepository mediaAssetRepository,
         IHashtagRepository hashtagRepository,
+        ICommentRepository commentRepository,
+        IPostReactionRepository postReactionRepository,
+        IFollowRepository followRepository,
+        IUserBlockRepository userBlockRepository,
+        IUserProfileRepository userProfileRepository,
         IUnitOfWork unitOfWork)
     {
         _currentUserService = currentUserService;
         _postRepository = postRepository;
         _mediaAssetRepository = mediaAssetRepository;
         _hashtagRepository = hashtagRepository;
+        _commentRepository = commentRepository;
+        _postReactionRepository = postReactionRepository;
+        _followRepository = followRepository;
+        _userBlockRepository = userBlockRepository;
+        _userProfileRepository = userProfileRepository;
         _unitOfWork = unitOfWork;
     }
  
@@ -48,7 +63,10 @@ public sealed class PublishPostCommandHandler : ICommandHandler<PublishPostComma
         post.Publish();
         await _unitOfWork.SaveChangesAsync(cancellationToken);
  
-        var dto = await PostDtoFactory.CreateAsync(post, _mediaAssetRepository, _hashtagRepository, cancellationToken);
+        var dto = await PostDtoFactory.CreateAsync(
+            post, authorId, _mediaAssetRepository, _hashtagRepository, _commentRepository,
+            _postReactionRepository, _postRepository, _followRepository, _userBlockRepository,
+            _userProfileRepository, cancellationToken);
         return Result.Success(dto);
     }
 }

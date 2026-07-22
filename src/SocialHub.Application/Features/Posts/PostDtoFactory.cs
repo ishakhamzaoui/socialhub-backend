@@ -1,4 +1,6 @@
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Application.Common.Policies;
+using SocialHub.Application.Features.Users.Follow;
 using SocialHub.Domain.Media;
 using SocialHub.Domain.Posts;
 using SocialHub.Domain.Shared;
@@ -6,19 +8,32 @@ using SocialHub.Domain.Shared;
 namespace SocialHub.Application.Features.Posts;
  
 /// <summary>
-/// Maps a Post aggregate (which only stores bare MediaAssetId/HashtagId
-/// references — see script 31) into the API-facing PostDto, resolving
-/// those references via the same repositories the Media and Hashtags
-/// features already use. Shared by Create/Update (this script) and
-/// GetPost (a later script) so this lookup-and-map logic exists in exactly
-/// one place.
+/// Maps a Post aggregate into the API-facing PostDto. Shared by every
+/// Post-returning handler/query so this lookup-and-map logic exists in
+/// exactly one place.
+///
+/// SIGNATURE CHANGE (script 52, Phase 8): CreateAsync now takes the
+/// requester's Guid plus six repositories instead of two, to build
+/// CommentCount, per-type reaction counts, the requester's own reaction, and
+/// an optional QuotedPost preview. This is a confirmed scope decision, not
+/// scope creep — see script 52's header. Every existing caller was updated
+/// in the same script.
 /// </summary>
 public static class PostDtoFactory
 {
+    private const int QuotedContentSnippetMaxLength = 200;
+ 
     public static async Task<PostDto> CreateAsync(
         Post post,
+        Guid requesterId,
         IMediaAssetRepository mediaAssetRepository,
         IHashtagRepository hashtagRepository,
+        ICommentRepository commentRepository,
+        IPostReactionRepository postReactionRepository,
+        IPostRepository postRepository,
+        IFollowRepository followRepository,
+        IUserBlockRepository userBlockRepository,
+        IUserProfileRepository userProfileRepository,
         CancellationToken cancellationToken = default)
     {
         var media = new List<PostMediaSummaryDto>();
@@ -49,6 +64,23 @@ public static class PostDtoFactory
  
         var mentionedUserIds = post.Mentions.Select(m => m.MentionedUserId).ToList();
  
+        var commentCount = await commentRepository.GetTotalCommentCountAsync(post.Id, cancellationToken);
+        var reactionCounts = await postReactionRepository.GetCountsByTypeAsync(post.Id, cancellationToken);
+        var myReaction = await postReactionRepository.GetAsync(post.Id, requesterId, cancellationToken);
+ 
+        QuotedPostPreviewDto? quotedPost = null;
+        if (post.Type == PostType.Quote && post.OriginalPostId is not null)
+        {
+            quotedPost = await BuildQuotedPreviewAsync(
+                post.OriginalPostId.Value,
+                requesterId,
+                postRepository,
+                followRepository,
+                userBlockRepository,
+                userProfileRepository,
+                cancellationToken);
+        }
+ 
         return new PostDto(
             post.Id,
             post.AuthorId,
@@ -64,7 +96,62 @@ public static class PostDtoFactory
             post.UpdatedAtUtc,
             media,
             hashtags,
-            mentionedUserIds);
+            mentionedUserIds,
+            commentCount,
+            reactionCounts,
+            myReaction?.Type,
+            quotedPost);
+    }
+ 
+    /// <summary>
+    /// Returns null — never throws, never fails the containing PostDto —
+    /// whenever the quoted original is gone (no DB-level FK backs
+    /// Post.OriginalPostId, per Phase 6's known limitation) or is no longer
+    /// visible to the requester (reuses PostAccessPolicy unmodified;
+    /// Blocked and Denied both suppress the preview, matching the existing
+    /// non-leaking convention rather than distinguishing them here).
+    /// </summary>
+    private static async Task<QuotedPostPreviewDto?> BuildQuotedPreviewAsync(
+        Guid originalPostId,
+        Guid requesterId,
+        IPostRepository postRepository,
+        IFollowRepository followRepository,
+        IUserBlockRepository userBlockRepository,
+        IUserProfileRepository userProfileRepository,
+        CancellationToken cancellationToken)
+    {
+        var original = await postRepository.GetByIdAsync(originalPostId, cancellationToken);
+        if (original is null)
+        {
+            return null;
+        }
+ 
+        var access = await PostAccessPolicy.EvaluateAsync(followRepository, userBlockRepository, original, requesterId, cancellationToken);
+        if (access is PostAccessResult.Blocked or PostAccessResult.Denied)
+        {
+            return null;
+        }
+ 
+        var authorProfile = await userProfileRepository.GetByUserIdAsync(original.AuthorId, cancellationToken);
+ 
+        return new QuotedPostPreviewDto(
+            original.Id,
+            original.AuthorId,
+            authorProfile is not null ? UserSummaryDto.From(authorProfile) : null,
+            TruncateSnippet(original.Content),
+            original.CreatedAtUtc);
+    }
+ 
+    private static string? TruncateSnippet(string? content)
+    {
+        if (content is null)
+        {
+            return null;
+        }
+ 
+        return content.Length <= QuotedContentSnippetMaxLength
+            ? content
+            : content[..QuotedContentSnippetMaxLength] + "…";
     }
  
     private static PostMediaSummaryDto ToSummary(MediaAsset asset, int order) => new(

@@ -1,11 +1,11 @@
-using MediatR;
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Application.Common.Messaging;
 using SocialHub.Application.Common.Results;
 using SocialHub.Domain.Posts;
  
 namespace SocialHub.Application.Features.Posts;
  
-public sealed class ArchivePostCommandHandler : IRequestHandler<ArchivePostCommand, Result>
+public sealed class ArchivePostCommandHandler : ICommandHandler<ArchivePostCommand>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IPostRepository _postRepository;

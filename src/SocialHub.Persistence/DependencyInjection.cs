@@ -46,6 +46,10 @@ public static class DependencyInjection
         services.AddScoped<ICommentReactionRepository, CommentReactionRepository>();
         services.AddScoped<ICommentReportRepository, CommentReportRepository>();
  
+        // Phase 8 — Feed Engine.
+        services.AddScoped<IPostReactionRepository, PostReactionRepository>();
+        services.AddScoped<IFeedRepository, FeedRepository>();
+ 
         return services;
     }
 }

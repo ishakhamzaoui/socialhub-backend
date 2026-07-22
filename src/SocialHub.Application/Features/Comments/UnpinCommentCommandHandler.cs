@@ -1,10 +1,10 @@
-using MediatR;
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Application.Common.Messaging;
 using SocialHub.Application.Common.Results;
  
 namespace SocialHub.Application.Features.Comments;
  
-public sealed class UnpinCommentCommandHandler : IRequestHandler<UnpinCommentCommand, Result>
+public sealed class UnpinCommentCommandHandler : ICommandHandler<UnpinCommentCommand>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly ICommentRepository _commentRepository;

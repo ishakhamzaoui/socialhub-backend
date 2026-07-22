@@ -1,11 +1,11 @@
-using MediatR;
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Application.Common.Messaging;
 using SocialHub.Application.Common.Results;
 using SocialHub.Domain.Posts;
  
 namespace SocialHub.Application.Features.Posts;
  
-public sealed class RepostCommandHandler : IRequestHandler<RepostCommand, Result>
+public sealed class RepostCommandHandler : ICommandHandler<RepostCommand>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IPostRepository _postRepository;

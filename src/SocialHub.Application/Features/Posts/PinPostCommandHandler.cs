@@ -1,11 +1,11 @@
-using MediatR;
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Application.Common.Messaging;
 using SocialHub.Application.Common.Results;
 using SocialHub.Domain.Posts;
  
 namespace SocialHub.Application.Features.Posts;
  
-public sealed class PinPostCommandHandler : IRequestHandler<PinPostCommand, Result>
+public sealed class PinPostCommandHandler : ICommandHandler<PinPostCommand>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IPostRepository _postRepository;

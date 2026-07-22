@@ -1,5 +1,6 @@
 using FluentAssertions;
 using SocialHub.Domain.Comments;
+using SocialHub.Domain.Shared;
 using Xunit;
  
 namespace SocialHub.Domain.Tests.Comments;

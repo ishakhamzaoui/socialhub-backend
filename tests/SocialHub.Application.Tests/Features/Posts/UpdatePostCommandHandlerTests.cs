@@ -13,10 +13,25 @@ public class UpdatePostCommandHandlerTests
     private readonly IPostRepository _postRepository = Substitute.For<IPostRepository>();
     private readonly IMediaAssetRepository _mediaAssetRepository = Substitute.For<IMediaAssetRepository>();
     private readonly IHashtagRepository _hashtagRepository = Substitute.For<IHashtagRepository>();
+    private readonly ICommentRepository _commentRepository = Substitute.For<ICommentRepository>();
+    private readonly IPostReactionRepository _postReactionRepository = Substitute.For<IPostReactionRepository>();
+    private readonly IFollowRepository _followRepository = Substitute.For<IFollowRepository>();
+    private readonly IUserBlockRepository _userBlockRepository = Substitute.For<IUserBlockRepository>();
+    private readonly IUserProfileRepository _userProfileRepository = Substitute.For<IUserProfileRepository>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
- 
+
     private UpdatePostCommandHandler CreateHandler() =>
-        new(_currentUserService, _postRepository, _mediaAssetRepository, _hashtagRepository, _unitOfWork);
+        new(
+            _currentUserService,
+            _postRepository,
+            _mediaAssetRepository,
+            _hashtagRepository,
+            _commentRepository,
+            _postReactionRepository,
+            _followRepository,
+            _userBlockRepository,
+            _userProfileRepository,
+            _unitOfWork);
  
     [Fact]
     public async Task Handle_Should_Fail_When_PostNotFound()

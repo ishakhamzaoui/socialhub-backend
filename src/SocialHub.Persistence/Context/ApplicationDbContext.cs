@@ -67,6 +67,10 @@ public class ApplicationDbContext
  
     public DbSet<CommentReport> CommentReports => Set<CommentReport>();
  
+    // Phase 8 — Feed Engine. PostReaction added (script 51) to give Posts
+    // the like/reaction capability they previously lacked entirely.
+    public DbSet<PostReaction> PostReactions => Set<PostReaction>();
+ 
     protected override void OnModelCreating(ModelBuilder modelBuilder)
     {
         modelBuilder.ApplyConfigurationsFromAssembly(typeof(ApplicationDbContext).Assembly);

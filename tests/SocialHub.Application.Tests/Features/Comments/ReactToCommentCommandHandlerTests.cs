@@ -3,6 +3,7 @@ using NSubstitute;
 using SocialHub.Application.Common.Interfaces;
 using SocialHub.Application.Features.Comments;
 using SocialHub.Domain.Comments;
+using SocialHub.Domain.Shared;
 using SocialHub.Domain.Posts;
 using Xunit;
  

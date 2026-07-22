@@ -1,5 +1,5 @@
-using MediatR;
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Application.Common.Messaging;
 using SocialHub.Application.Common.Results;
  
 namespace SocialHub.Application.Features.Comments;
@@ -10,7 +10,7 @@ namespace SocialHub.Application.Features.Comments;
 /// how mainstream platforms let a post owner curate a top comment. Revisit
 /// if comment-authors were meant to have self-pin rights instead.
 /// </summary>
-public sealed class PinCommentCommandHandler : IRequestHandler<PinCommentCommand, Result>
+public sealed class PinCommentCommandHandler : ICommandHandler<PinCommentCommand>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly ICommentRepository _commentRepository;

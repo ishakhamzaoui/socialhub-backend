@@ -1,13 +1,13 @@
-using MediatR;
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Application.Common.Messaging;
 using SocialHub.Application.Common.Results;
  
 namespace SocialHub.Application.Features.Comments;
  
-// Plain IRequestHandler<TCommand, Result>, matching DeletePostCommandHandler's
-// pattern for void-returning commands (no non-generic ICommandHandler<TCommand>
-// wrapper exists in this codebase).
-public sealed class DeleteCommentCommandHandler : IRequestHandler<DeleteCommentCommand, Result>
+// ICommandHandler<TCommand> — see DeletePostCommandHandler's header comment
+// for why this replaced the direct IRequestHandler<TCommand, Result> shape
+// (script 50, Phase 8 kickoff).
+public sealed class DeleteCommentCommandHandler : ICommandHandler<DeleteCommentCommand>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly ICommentRepository _commentRepository;

@@ -1,6 +1,7 @@
 using Microsoft.EntityFrameworkCore;
 using SocialHub.Application.Common.Interfaces;
 using SocialHub.Domain.Comments;
+using SocialHub.Domain.Shared;
 using SocialHub.Persistence.Common;
  
 namespace SocialHub.Persistence.Repositories;

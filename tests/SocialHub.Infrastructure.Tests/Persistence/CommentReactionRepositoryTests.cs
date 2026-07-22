@@ -1,6 +1,7 @@
 using FluentAssertions;
 using Microsoft.EntityFrameworkCore;
 using SocialHub.Domain.Comments;
+using SocialHub.Domain.Shared;
 using SocialHub.Persistence.Repositories;
 using Xunit;
  

@@ -71,4 +71,7 @@ public sealed class CommentRepository : RepositoryBase<Comment, Guid>, ICommentR
  
     public async Task<Comment?> GetPinnedCommentForPostAsync(Guid postId, CancellationToken cancellationToken = default) =>
         await _context.Set<Comment>().FirstOrDefaultAsync(c => c.PostId == postId && c.IsPinned, cancellationToken);
+ 
+    public async Task<int> GetTotalCommentCountAsync(Guid postId, CancellationToken cancellationToken = default) =>
+        await _context.Set<Comment>().CountAsync(c => c.PostId == postId && !c.IsDeleted, cancellationToken);
 }

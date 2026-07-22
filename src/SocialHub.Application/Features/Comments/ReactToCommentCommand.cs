@@ -1,6 +1,6 @@
 using SocialHub.Application.Common.Behaviors;
 using SocialHub.Application.Common.Messaging;
-using SocialHub.Domain.Comments;
+using SocialHub.Domain.Shared;
  
 namespace SocialHub.Application.Features.Comments;
  

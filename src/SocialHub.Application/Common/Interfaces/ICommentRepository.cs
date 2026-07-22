@@ -49,4 +49,13 @@ public interface ICommentRepository : IRepository<Comment, Guid>
     /// single Comment can't know about its post's other comments.
     /// </summary>
     Task<Comment?> GetPinnedCommentForPostAsync(Guid postId, CancellationToken cancellationToken = default);
+ 
+    /// <summary>
+    /// Added in script 52 (Phase 8) for PostDto.CommentCount — a straight
+    /// COUNT of all non-deleted comments (top-level + replies) on a post.
+    /// Soft-deleted (tombstoned) comments are excluded from this count even
+    /// though their row survives for thread-structure purposes — see this
+    /// script's header for the reasoning.
+    /// </summary>
+    Task<int> GetTotalCommentCountAsync(Guid postId, CancellationToken cancellationToken = default);
 }

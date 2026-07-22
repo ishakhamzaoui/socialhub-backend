@@ -10,17 +10,32 @@ public sealed class GetMyPostsQueryHandler : IQueryHandler<GetMyPostsQuery, Page
     private readonly IPostRepository _postRepository;
     private readonly IMediaAssetRepository _mediaAssetRepository;
     private readonly IHashtagRepository _hashtagRepository;
+    private readonly ICommentRepository _commentRepository;
+    private readonly IPostReactionRepository _postReactionRepository;
+    private readonly IFollowRepository _followRepository;
+    private readonly IUserBlockRepository _userBlockRepository;
+    private readonly IUserProfileRepository _userProfileRepository;
  
     public GetMyPostsQueryHandler(
         ICurrentUserService currentUserService,
         IPostRepository postRepository,
         IMediaAssetRepository mediaAssetRepository,
-        IHashtagRepository hashtagRepository)
+        IHashtagRepository hashtagRepository,
+        ICommentRepository commentRepository,
+        IPostReactionRepository postReactionRepository,
+        IFollowRepository followRepository,
+        IUserBlockRepository userBlockRepository,
+        IUserProfileRepository userProfileRepository)
     {
         _currentUserService = currentUserService;
         _postRepository = postRepository;
         _mediaAssetRepository = mediaAssetRepository;
         _hashtagRepository = hashtagRepository;
+        _commentRepository = commentRepository;
+        _postReactionRepository = postReactionRepository;
+        _followRepository = followRepository;
+        _userBlockRepository = userBlockRepository;
+        _userProfileRepository = userProfileRepository;
     }
  
     public async Task<Result<PagedPostListDto>> Handle(GetMyPostsQuery request, CancellationToken cancellationToken)
@@ -35,7 +50,10 @@ public sealed class GetMyPostsQueryHandler : IQueryHandler<GetMyPostsQuery, Page
         var dtos = new List<PostDto>();
         foreach (var post in posts)
         {
-            dtos.Add(await PostDtoFactory.CreateAsync(post, _mediaAssetRepository, _hashtagRepository, cancellationToken));
+            dtos.Add(await PostDtoFactory.CreateAsync(
+                post, authorId, _mediaAssetRepository, _hashtagRepository, _commentRepository,
+                _postReactionRepository, _postRepository, _followRepository, _userBlockRepository,
+                _userProfileRepository, cancellationToken));
         }
  
         return Result.Success(new PagedPostListDto(dtos, total, request.Page, request.PageSize));

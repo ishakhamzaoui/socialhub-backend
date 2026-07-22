@@ -1,12 +1,12 @@
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Application.Common.Messaging;
 using SocialHub.Application.Common.Policies;
 using SocialHub.Application.Common.Results;
-using MediatR;
 using SocialHub.Domain.Comments;
  
 namespace SocialHub.Application.Features.Comments;
  
-public sealed class ReportCommentCommandHandler : IRequestHandler<ReportCommentCommand, Result>
+public sealed class ReportCommentCommandHandler : ICommandHandler<ReportCommentCommand>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly ICommentRepository _commentRepository;

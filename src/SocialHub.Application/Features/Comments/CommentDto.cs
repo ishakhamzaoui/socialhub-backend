@@ -1,4 +1,4 @@
-using SocialHub.Domain.Comments;
+using SocialHub.Domain.Shared;
  
 namespace SocialHub.Application.Features.Comments;
  

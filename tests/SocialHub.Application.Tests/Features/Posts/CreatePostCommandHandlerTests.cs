@@ -18,11 +18,24 @@ public class CreatePostCommandHandlerTests
     private readonly IHashtagRepository _hashtagRepository = Substitute.For<IHashtagRepository>();
     private readonly IUserProfileRepository _userProfileRepository = Substitute.For<IUserProfileRepository>();
     private readonly IUserBlockRepository _userBlockRepository = Substitute.For<IUserBlockRepository>();
+    private readonly ICommentRepository _commentRepository = Substitute.For<ICommentRepository>();
+    private readonly IPostReactionRepository _postReactionRepository = Substitute.For<IPostReactionRepository>();
+    private readonly IFollowRepository _followRepository = Substitute.For<IFollowRepository>();
     private readonly IUnitOfWork _unitOfWork = Substitute.For<IUnitOfWork>();
  
     private CreatePostCommandHandler CreateHandler() =>
-        new(_currentUserService, _postRepository, _mediaAssetRepository, _hashtagRepository, _userProfileRepository, _userBlockRepository, _unitOfWork);
- 
+        new(
+            _currentUserService,
+            _postRepository,
+            _mediaAssetRepository,
+            _hashtagRepository,
+            _userProfileRepository,
+            _userBlockRepository,
+            _commentRepository,
+            _postReactionRepository,
+            _followRepository,
+            _unitOfWork);
+
     private static CreatePostCommand SimpleCommand(string? content = "hello world") =>
         new(content, PostVisibility.Public, PostType.Original, null, PostStatus.Published, null, null, null, null);
  

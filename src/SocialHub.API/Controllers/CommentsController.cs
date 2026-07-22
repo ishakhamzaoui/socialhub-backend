@@ -5,6 +5,7 @@ using Microsoft.AspNetCore.Mvc;
 using SocialHub.API.Extensions;
 using SocialHub.Application.Features.Comments;
 using SocialHub.Domain.Comments;
+using SocialHub.Domain.Shared;
  
 namespace SocialHub.API.Controllers;
  

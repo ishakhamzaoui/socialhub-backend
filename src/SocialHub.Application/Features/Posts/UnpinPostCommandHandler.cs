@@ -1,10 +1,10 @@
-using MediatR;
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Application.Common.Messaging;
 using SocialHub.Application.Common.Results;
  
 namespace SocialHub.Application.Features.Posts;
  
-public sealed class UnpinPostCommandHandler : IRequestHandler<UnpinPostCommand, Result>
+public sealed class UnpinPostCommandHandler : ICommandHandler<UnpinPostCommand>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IPostRepository _postRepository;

@@ -14,6 +14,9 @@ public sealed class CreatePostCommandHandler : ICommandHandler<CreatePostCommand
     private readonly IHashtagRepository _hashtagRepository;
     private readonly IUserProfileRepository _userProfileRepository;
     private readonly IUserBlockRepository _userBlockRepository;
+    private readonly ICommentRepository _commentRepository;
+    private readonly IPostReactionRepository _postReactionRepository;
+    private readonly IFollowRepository _followRepository;
     private readonly IUnitOfWork _unitOfWork;
  
     public CreatePostCommandHandler(
@@ -23,6 +26,9 @@ public sealed class CreatePostCommandHandler : ICommandHandler<CreatePostCommand
         IHashtagRepository hashtagRepository,
         IUserProfileRepository userProfileRepository,
         IUserBlockRepository userBlockRepository,
+        ICommentRepository commentRepository,
+        IPostReactionRepository postReactionRepository,
+        IFollowRepository followRepository,
         IUnitOfWork unitOfWork)
     {
         _currentUserService = currentUserService;
@@ -31,6 +37,9 @@ public sealed class CreatePostCommandHandler : ICommandHandler<CreatePostCommand
         _hashtagRepository = hashtagRepository;
         _userProfileRepository = userProfileRepository;
         _userBlockRepository = userBlockRepository;
+        _commentRepository = commentRepository;
+        _postReactionRepository = postReactionRepository;
+        _followRepository = followRepository;
         _unitOfWork = unitOfWork;
     }
  
@@ -91,7 +100,10 @@ public sealed class CreatePostCommandHandler : ICommandHandler<CreatePostCommand
  
         await _unitOfWork.SaveChangesAsync(cancellationToken);
  
-        var dto = await PostDtoFactory.CreateAsync(post, _mediaAssetRepository, _hashtagRepository, cancellationToken);
+        var dto = await PostDtoFactory.CreateAsync(
+            post, authorId, _mediaAssetRepository, _hashtagRepository, _commentRepository,
+            _postReactionRepository, _postRepository, _followRepository, _userBlockRepository,
+            _userProfileRepository, cancellationToken);
         return Result.Success(dto);
     }
  

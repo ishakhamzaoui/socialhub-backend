@@ -1,13 +1,16 @@
-using MediatR;
 using SocialHub.Application.Common.Interfaces;
+using SocialHub.Application.Common.Messaging;
 using SocialHub.Application.Common.Results;
  
 namespace SocialHub.Application.Features.Posts;
  
-// Plain IRequestHandler<TCommand, Result>, matching DeleteMediaCommandHandler's
-// pattern for void-returning commands (no non-generic ICommandHandler<TCommand>
-// wrapper exists in this codebase).
-public sealed class DeletePostCommandHandler : IRequestHandler<DeletePostCommand, Result>
+// ICommandHandler<TCommand> (Application/Common/Messaging/ICommandHandler.cs)
+// — the codebase's canonical shape for void-returning commands, matching
+// Phase 5's BlockUserCommandHandler/MuteUserCommandHandler et al. Script 50
+// (Phase 8 kickoff) corrected this handler from a direct
+// IRequestHandler<TCommand, Result> implementation after discovering the
+// wrapper genuinely exists — see the Advancement doc's Phase 8 entry.
+public sealed class DeletePostCommandHandler : ICommandHandler<DeletePostCommand>
 {
     private readonly ICurrentUserService _currentUserService;
     private readonly IPostRepository _postRepository;
